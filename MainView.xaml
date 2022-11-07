@@ -6,12 +6,12 @@
              xmlns:local="clr-namespace:RevitAPITrainingСreateElementsAndAnnotations"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
-            Title="Создание воздуховодов">
+            Title="Создание мебели">
     <StackPanel>
-        <Label Content="Выбрать тип воздуховода из списка"
+        <Label Content="Выбрать тип мебели"
                Margin="5"/>
-        <ComboBox ItemsSource="{Binding DuctTypes}"
-                  SelectedValue="{Binding SelectedDuctType}"
+        <ComboBox ItemsSource="{Binding FamilyInstance}"
+                  SelectedValue="{Binding SelectedFamilyType}"
                   DisplayMemberPath="Name"
                   Margin="5"/>
         <Label Content="Выбрать уровень из списка"/>
@@ -19,8 +19,6 @@
                   SelectedValue="{Binding SelectedLevel}"
                   DisplayMemberPath="Name"
                   Margin="5"/>
-        <Label Content="Отметка"/>
-        <TextBox Text="{Binding WallHeight}" Margin="5"/>
 
         <Button Content="Применить"
                 Command="{Binding SaveCommand}"

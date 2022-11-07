@@ -27,6 +27,8 @@ namespace RevitAPITrainingСreateElementsAndAnnotations
 
         public List<WallType> WallTypes { get; } = new List<WallType>();
 
+        public List<FurnitureUtils> FurnitureUtils { get; } = new List<FurnitureUtils>();
+
         public List<DuctType> DuctTypes { get; } = new List<DuctType>();
 
         public List<Level> Levels { get; } = new List<Level>();
@@ -34,6 +36,8 @@ namespace RevitAPITrainingСreateElementsAndAnnotations
         public DelegateCommand SaveCommand { get; }
 
         public WallType SelectedWallType { get; set; }
+
+        public FurnitureUtils SelectedFurnitureUtils { get; set; }
 
         public MEPSystemType DuctSystemTypes { get; set; }
 
@@ -86,36 +90,44 @@ namespace RevitAPITrainingСreateElementsAndAnnotations
 
             //ReiseCloseRequest();
 
-            if (Points.Count > 2 || DuctSystemTypes == null || SelectedLevel == null || SelectedDuctTypes == null)
+            if (Points.Count < 1 || DuctSystemTypes == null || SelectedLevel == null || SelectedFamilyType == null)
                 return;
 
             var curves = new List<Curve>();
 
-            for (int i = 0; i < Points.Count; i++)
-            {
-                if (i == 0)
-                    continue;
 
-                var prevPoint = Points[i - 1];
-                var currentPoint = Points[i];
-
-                Curve curve = Line.CreateBound(prevPoint, currentPoint);
-                curves.Add(curve);
-            }
-
-            using (var ts = new Transaction(doc, "Create Duct"))
+            using (var ts = new Transaction(doc, "Create Furniture"))
             {
                 ts.Start();
+                XYZ StartPoint = null;
+                StartPoint = uidoc.Selection.PickPoint("Выберите точку");
+                var familyInstance = FamilyInstanceUtils.CreateFamilyInstance(_commandData, SelectedFamilyType, StartPoint, SelectedLevel);
 
-                foreach (var curve in curves)
-                {
-                        Duct.Create(doc, DuctSystemTypes.Id, SelectedDuctTypes.Id, SelectedLevel.Id,
-                        PickPoint, currentPoint);
 
-                }
 
+
+                //for (int i = 0; i < Points.Count; i++)
+                //{
+                //    if (i == 0)
+                //        continue;
+
+                //    var prevPoint = Points[i - 1];
+                //    var currentPoint = Points[i];
+
+                //    Curve curve = Line.CreateBound(prevPoint, currentPoint);
+                //    curves.Add(curve);
+
+                //Duct duct=Duct.Create(doc, DuctSystemTypes.Id, SelectedDuctTypes.Id, SelectedLevel.Id,
+                //prevPoint, currentPoint);
+
+                //duct.get_Parameter(BuiltInParameter.RBS_OFFSET_PARAM).Set(UnitUtils.ConvertToInternalUnits(WallHeight, UnitTypeId.Millimeters));
                 ts.Commit();
             }
+
+
+
+                
+           
 
         }
         public event EventHandler CloseRequest;
