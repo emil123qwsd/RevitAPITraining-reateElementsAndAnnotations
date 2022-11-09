@@ -8,18 +8,15 @@
              d:DesignHeight="300" d:DesignWidth="300"
             Title="Создание мебели">
     <StackPanel>
-        <Label Content="Выбрать тип мебели"
+        <Label Content="Выбрать тип метки"
                Margin="5"/>
-        <ComboBox ItemsSource="{Binding FamilyInstance}"
-                  SelectedValue="{Binding SelectedFamilyType}"
+        <ComboBox ItemsSource="{Binding Tags}"
+                  SelectedValue="{Binding SelectedTagType}"
                   DisplayMemberPath="Name"
                   Margin="5"/>
-        <Label Content="Выбрать уровень из списка"/>
-        <ComboBox ItemsSource="{Binding Levels}"
-                  SelectedValue="{Binding SelectedLevel}"
-                  DisplayMemberPath="Name"
-                  Margin="5"/>
-
+        <Label Content="Количество элементов"/>
+        <TextBlock Text="{Binding n}" Margin="5"/>
+        
         <Button Content="Применить"
                 Command="{Binding SaveCommand}"
                 Margin="5"/>

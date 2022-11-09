@@ -21,6 +21,8 @@ namespace RevitAPITrainingСreateElementsAndAnnotations
 
         public List<FamilySymbol> Tags { get; }
 
+        public List<FamilySymbol> FamilyTypes { get; }
+
         public FamilySymbol SelectedFamilyType { get; set; }
 
         public FamilySymbol SelectedTagType { get; set; }
@@ -58,11 +60,12 @@ namespace RevitAPITrainingСreateElementsAndAnnotations
             //Pipe = SelectionUtils.GetObject<Pipe>(commandData, "Выберите трубу");
             //FamilyTypes = FamilySymbolUtils.GetFamilySymbols(commandData);
             //WallTypes = WallsUtils.GetWallTypes(commandData);
-            DuctSystemTypes = DuctUtils.GetDuctSystemTypes(commandData);
-            Levels = LevelsUtils.GetLevels(commandData);
+            //DuctSystemTypes = DuctUtils.GetDuctSystemTypes(commandData);
+            //Levels = LevelsUtils.GetLevels(commandData);
             SaveCommand = new DelegateCommand(OnSaveCommand);
-            WallHeight = 100;
+            int n = 10;
             Points = SelectionUtils.GetPoints(_commandData, "Выберите точки", ObjectSnapTypes.Endpoints);
+            FamilyTypes = FamilySymbolUtils.GetFamilySymbols(commandData);
         }
 
         private void OnSaveCommand() 
@@ -71,16 +74,26 @@ namespace RevitAPITrainingСreateElementsAndAnnotations
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
 
-            //var locationCurve = Pipe.Location as LocationCurve;
-            //var pipeCurve = locationCurve.Curve;
-            //var pipeMidPoint = (pipeCurve.GetEndPoint(0) + pipeCurve.GetEndPoint(1)) / 2;
+            int n = 10;
+            var locationCurve = Pipe.Location as LocationCurve;
+            var pipeCurve = locationCurve.Curve;
 
-            //using (var ts = new Transaction(doc, "Create tag"))
-            //{
-            //    ts.Start();
-            //    IndependentTag.Create(doc, SelectedTagType.Id, doc.ActiveView.Id, new Reference(Pipe), false, TagOrientation.Horizontal, pipeMidPoint);
-            //    ts.Commit();
-            //}
+            for (int i = 2; i < n; i++)
+            {
+                var pipeMidPoint = (pipeCurve.GetEndPoint(0) + pipeCurve.GetEndPoint(1)) / i;
+                using (var ts = new Transaction(doc, "Create tag"))
+                {
+                    ts.Start();
+                    IndependentTag.Create(doc, SelectedTagType.Id, doc.ActiveView.Id, new Reference(Pipe), false, TagOrientation.Horizontal, pipeMidPoint);
+                    ts.Commit();
+                }
+                var oLevel = (Level)doc.GetElement(Pipe.LevelId);
+
+                FamilyInstanceUtils.CreateFamilyInstance(_commandData, SelectedFamilyType, pipeCurve.GetEndPoint(0), oLevel);
+                FamilyInstanceUtils.CreateFamilyInstance(_commandData, SelectedFamilyType, pipeCurve.GetEndPoint(1), oLevel);
+
+                ReiseCloseRequest();
+            }
 
 
             //var oLevel = (Level)doc.GetElement(Pipe.LevelId);
@@ -90,44 +103,46 @@ namespace RevitAPITrainingСreateElementsAndAnnotations
 
             //ReiseCloseRequest();
 
-            if (Points.Count < 1 || DuctSystemTypes == null || SelectedLevel == null || SelectedFamilyType == null)
-                return;
+            //if (Points.Count > 2 || SelectedLevel == null || SelectedFamilyType == null)
+            //    return;
 
-            var curves = new List<Curve>();
-
-
-            using (var ts = new Transaction(doc, "Create Furniture"))
-            {
-                ts.Start();
-                XYZ StartPoint = null;
-                StartPoint = uidoc.Selection.PickPoint("Выберите точку");
-                var familyInstance = FamilyInstanceUtils.CreateFamilyInstance(_commandData, SelectedFamilyType, StartPoint, SelectedLevel);
+            //var curves = new List<Curve>();
 
 
-
-
-                //for (int i = 0; i < Points.Count; i++)
-                //{
-                //    if (i == 0)
-                //        continue;
-
-                //    var prevPoint = Points[i - 1];
-                //    var currentPoint = Points[i];
-
-                //    Curve curve = Line.CreateBound(prevPoint, currentPoint);
-                //    curves.Add(curve);
-
-                //Duct duct=Duct.Create(doc, DuctSystemTypes.Id, SelectedDuctTypes.Id, SelectedLevel.Id,
-                //prevPoint, currentPoint);
-
-                //duct.get_Parameter(BuiltInParameter.RBS_OFFSET_PARAM).Set(UnitUtils.ConvertToInternalUnits(WallHeight, UnitTypeId.Millimeters));
-                ts.Commit();
-            }
+            //using (var ts = new Transaction(doc, "Create Furniture"))
+            //{
+            //    ts.Start();
+            //    //XYZ StartPoint = null;
+            //    //StartPoint = uidoc.Selection.PickPoint("Выберите точку");
+            //    //var familyInstance = FamilySymbolUtils.GetFamilySymbols(_commandData, SelectedFamilyType, StartPoint, SelectedLevel);
 
 
 
-                
-           
+
+            //    //for (int i = 0; i < Points.Count; i++)
+            //    //{
+            //    //    if (i == 0)
+            //    //        continue;
+
+            //    //    var prevPoint = Points[i - 1];
+            //    //    var currentPoint = Points[i];
+
+            //    //    Curve curve = Line.CreateBound(prevPoint, currentPoint);
+            //    //    curves.Add(curve);
+
+            //    //    Duct duct = Duct.Create(doc, DuctSystemTypes.Id, SelectedDuctTypes.Id, SelectedLevel.Id,
+            //    //    prevPoint, currentPoint);
+            //    //    IndependentTag.Create(doc, SelectedTagType.Id, doc.ActiveView.Id, new Reference(Pipe), false, TagOrientation.Horizontal, pipeMidPoint);
+
+            //    //    duct.get_Parameter(BuiltInParameter.RBS_OFFSET_PARAM).Set(UnitUtils.ConvertToInternalUnits(WallHeight, UnitTypeId.Millimeters));
+            //    //    ts.Commit();
+            //    //}
+            //}
+
+
+
+
+
 
         }
         public event EventHandler CloseRequest;
